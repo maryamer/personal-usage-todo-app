@@ -3,7 +3,7 @@ import { load, save } from '../storage/storage';
 import { format } from '../utils/timer';
 
 export default function Timer() {
-  const [minutes, setMinutes] = useState(25);
+  const [minutes, setMinutes] = useState(90);
   const [time, setTime] = useState(minutes * 60);
   const [run, setRun] = useState(false);
 
