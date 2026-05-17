@@ -1,39 +1,76 @@
-import { useEffect, useState } from 'react';
-import TaskItem from '../components/TaskItem';
+import { useState } from 'react';
 import { load, save } from '../storage/storage';
 
 export default function Tasks() {
   const [tasks, setTasks] = useState(load('tasks', []));
-  const [text, setText] = useState('');
+  const [newTask, setNewTask] = useState('');
 
-  useEffect(() => save('tasks', tasks), [tasks]);
+  function addTask() {
+    if (!newTask.trim()) return;
 
-  const add = () => {
-    if (!text.trim()) return;
-    setTasks([...tasks, { id: Date.now(), text: text.trim(), done: false }]);
-    setText('');
-  };
+    const updated = [...tasks, { id: Date.now(), text: newTask, done: false }];
+    setTasks(updated);
+    save('tasks', updated);
+    setNewTask('');
+  }
 
-  const toggle = (id) =>
-    setTasks(tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  function toggleTask(id) {
+    const updated = tasks.map((t) =>
+      t.id === id ? { ...t, done: !t.done } : t,
+    );
+    setTasks(updated);
+    save('tasks', updated);
+  }
 
-  const del = (id) => setTasks(tasks.filter((t) => t.id !== id));
+  function deleteTask(id) {
+    const updated = tasks.filter((t) => t.id !== id);
+    setTasks(updated);
+    save('tasks', updated);
+  }
 
   return (
-    <div>
-      <h2>Tasks</h2>
-      <div className="row">
+    <div className="bg-white p-6 rounded-xl shadow-md max-w-md mx-auto mt-6">
+      <h2 className="text-xl font-semibold mb-4 text-gray-700">Tasks</h2>
+
+      <div className="flex gap-2 mb-4">
         <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="New task"
+          value={newTask}
+          onChange={(e) => setNewTask(e.target.value)}
+          placeholder="New task..."
+          className="flex-1 border rounded-md px-3 py-2"
         />
-        <button onClick={add}>Add</button>
+        <button
+          onClick={addTask}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+        >
+          Add
+        </button>
       </div>
 
-      {tasks.map((t) => (
-        <TaskItem key={t.id} task={t} onToggle={toggle} onDelete={del} />
-      ))}
+      <ul className="space-y-2">
+        {tasks.map((task) => (
+          <li
+            key={task.id}
+            className="flex items-center justify-between bg-gray-50 p-3 rounded-md"
+          >
+            <span
+              onClick={() => toggleTask(task.id)}
+              className={`cursor-pointer ${
+                task.done ? 'line-through text-gray-400' : ''
+              }`}
+            >
+              {task.text}
+            </span>
+
+            <button
+              onClick={() => deleteTask(task.id)}
+              className="text-red-500 hover:text-red-700"
+            >
+              ✕
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
